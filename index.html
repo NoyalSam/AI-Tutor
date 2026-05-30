@@ -1,0 +1,1082 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TutorAI — Interview Prep</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0f14;
+    --surface: #13161d;
+    --surface2: #1a1e28;
+    --surface3: #222636;
+    --border: rgba(255,255,255,0.07);
+    --border2: rgba(255,255,255,0.13);
+    --text: #e2e4ec;
+    --muted: #6b7280;
+    --dim: #2e3347;
+    --gold: #e8b86d;
+    --gold-soft: rgba(232,184,109,0.12);
+    --gold-glow: rgba(232,184,109,0.2);
+    --green: #4ade80;
+    --green-soft: rgba(74,222,128,0.1);
+    --red: #f87171;
+    --red-soft: rgba(248,113,113,0.1);
+    --blue: #60a5fa;
+    --blue-soft: rgba(96,165,250,0.1);
+    --mono: 'DM Mono', monospace;
+    --serif: 'DM Serif Display', serif;
+    --body: 'Outfit', sans-serif;
+    --r: 10px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--body);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* subtle dot grid bg */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: radial-gradient(circle, rgba(255,255,255,0.035) 1px, transparent 1px);
+    background-size: 28px 28px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── Header ── */
+  header {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.1rem 2rem;
+    border-bottom: 1px solid var(--border);
+    backdrop-filter: blur(10px);
+    background: rgba(13,15,20,0.85);
+  }
+
+  .brand {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+  }
+
+  .brand-name {
+    font-family: var(--serif);
+    font-size: 1.4rem;
+    color: var(--gold);
+    letter-spacing: -0.01em;
+  }
+
+  .brand-tag {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  /* progress bar at top */
+  #progress-bar-wrap {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    z-index: 100;
+    display: none;
+  }
+
+  #progress-bar {
+    height: 100%;
+    background: var(--gold);
+    transition: width 0.5s ease;
+    width: 0%;
+  }
+
+  /* ── Main ── */
+  main {
+    position: relative;
+    z-index: 1;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 16px;
+    width: 100%;
+    max-width: 680px;
+    overflow: hidden;
+    box-shadow: 0 24px 64px rgba(0,0,0,0.5);
+  }
+
+  /* ── Screens (show/hide) ── */
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  /* ── Screen 1: Setup ── */
+  .setup-body {
+    padding: 2.5rem 2.5rem 2rem;
+  }
+
+  .screen-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 0.5rem;
+  }
+
+  .screen-title {
+    font-family: var(--serif);
+    font-size: 2rem;
+    color: var(--text);
+    margin-bottom: 0.4rem;
+    line-height: 1.2;
+  }
+
+  .screen-sub {
+    font-size: 14px;
+    color: var(--muted);
+    margin-bottom: 2rem;
+    line-height: 1.6;
+  }
+
+  .field {
+    margin-bottom: 1.4rem;
+  }
+
+  .field label {
+    display: block;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.5rem;
+  }
+
+  .field input[type="text"] {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: var(--r);
+    padding: 0.8rem 1rem;
+    font-family: var(--body);
+    font-size: 15px;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .field input[type="text"]:focus {
+    border-color: var(--gold);
+    box-shadow: 0 0 0 3px var(--gold-glow);
+  }
+
+  .field input[type="text"]::placeholder {
+    color: var(--dim);
+  }
+
+  /* Level selector */
+  .level-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+
+  .level-btn {
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: var(--r);
+    padding: 0.75rem 0.5rem;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s;
+    color: var(--muted);
+    font-family: var(--body);
+  }
+
+  .level-btn .lv-icon { font-size: 1.3rem; display: block; margin-bottom: 4px; }
+  .level-btn .lv-label { font-size: 13px; font-weight: 500; display: block; }
+  .level-btn .lv-desc { font-size: 11px; color: var(--dim); display: block; margin-top: 2px; }
+
+  .level-btn:hover { border-color: var(--gold); color: var(--text); }
+
+  .level-btn.selected {
+    border-color: var(--gold);
+    background: var(--gold-soft);
+    color: var(--gold);
+  }
+
+  .level-btn.selected .lv-desc { color: var(--gold); opacity: 0.6; }
+
+  /* Question count */
+  .count-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .count-chip {
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: 20px;
+    padding: 6px 18px;
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .count-chip:hover { border-color: var(--gold); color: var(--text); }
+
+  .count-chip.selected {
+    border-color: var(--gold);
+    background: var(--gold-soft);
+    color: var(--gold);
+  }
+
+  /* Primary button */
+  .btn-primary {
+    width: 100%;
+    background: var(--gold);
+    color: #0d0f14;
+    border: none;
+    border-radius: var(--r);
+    padding: 0.9rem;
+    font-family: var(--body);
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 0.5rem;
+    letter-spacing: 0.02em;
+  }
+
+  .btn-primary:hover { filter: brightness(1.1); transform: translateY(-1px); box-shadow: 0 6px 24px var(--gold-glow); }
+  .btn-primary:active { transform: none; }
+  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+
+  /* ── Screen 2: Question ── */
+  .q-header {
+    background: var(--surface2);
+    padding: 1rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .q-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .q-num {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--gold);
+  }
+
+  .q-topic-badge {
+    background: var(--gold-soft);
+    border: 1px solid rgba(232,184,109,0.25);
+    border-radius: 20px;
+    padding: 3px 12px;
+    font-size: 11px;
+    color: var(--gold);
+    font-family: var(--mono);
+  }
+
+  .q-level-badge {
+    background: var(--surface3);
+    border: 1px solid var(--border2);
+    border-radius: 20px;
+    padding: 3px 12px;
+    font-size: 11px;
+    color: var(--muted);
+    font-family: var(--mono);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  /* Dot progress */
+  .dot-progress {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+
+  .dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--dim);
+    transition: background 0.3s;
+  }
+
+  .dot.done { background: var(--green); }
+  .dot.active { background: var(--gold); }
+
+  .q-body { padding: 2rem 2rem 1.5rem; }
+
+  .q-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.8rem;
+  }
+
+  .q-text {
+    font-family: var(--serif);
+    font-size: 1.3rem;
+    line-height: 1.55;
+    color: var(--text);
+    margin-bottom: 1.8rem;
+  }
+
+  .answer-label {
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.5rem;
+  }
+
+  #answer-input {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: var(--r);
+    padding: 1rem;
+    font-family: var(--body);
+    font-size: 14px;
+    color: var(--text);
+    outline: none;
+    resize: vertical;
+    min-height: 100px;
+    line-height: 1.6;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  #answer-input:focus {
+    border-color: var(--gold);
+    box-shadow: 0 0 0 3px var(--gold-glow);
+  }
+
+  #answer-input::placeholder { color: var(--dim); }
+
+  .submit-row {
+    display: flex;
+    justify-content: flex-end;
+    padding: 0 2rem 1.5rem;
+  }
+
+  .btn-submit {
+    background: var(--gold);
+    color: #0d0f14;
+    border: none;
+    border-radius: var(--r);
+    padding: 0.7rem 2rem;
+    font-family: var(--body);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .btn-submit:hover { filter: brightness(1.1); transform: translateY(-1px); }
+  .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  /* ── Screen 3: Result ── */
+  .result-body { padding: 1.5rem 2rem 2rem; }
+
+  .verdict-banner {
+    border-radius: var(--r);
+    padding: 1rem 1.25rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .verdict-banner.good {
+    background: var(--green-soft);
+    border: 1px solid rgba(74,222,128,0.2);
+  }
+
+  .verdict-banner.bad {
+    background: var(--red-soft);
+    border: 1px solid rgba(248,113,113,0.2);
+  }
+
+  .verdict-icon { font-size: 1.4rem; }
+
+  .verdict-text .vt-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 2px;
+  }
+
+  .verdict-text .vt-score {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .result-section {
+    margin-bottom: 1.25rem;
+  }
+
+  .result-section-title {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.6rem;
+  }
+
+  .result-box {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    padding: 1rem 1.1rem;
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--text);
+  }
+
+  .result-box.correct-ans {
+    border-left: 3px solid var(--green);
+    border-radius: 0 var(--r) var(--r) 0;
+  }
+
+  .result-box.example {
+    border-left: 3px solid var(--blue);
+    border-radius: 0 var(--r) var(--r) 0;
+    color: var(--blue);
+    background: var(--blue-soft);
+  }
+
+  .result-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 1.5rem;
+  }
+
+  .btn-ok {
+    flex: 1;
+    background: var(--gold);
+    color: #0d0f14;
+    border: none;
+    border-radius: var(--r);
+    padding: 0.8rem;
+    font-family: var(--body);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-ok:hover { filter: brightness(1.1); transform: translateY(-1px); }
+
+  /* ── Screen 4: Complete ── */
+  .complete-body {
+    padding: 3rem 2rem;
+    text-align: center;
+  }
+
+  .complete-icon { font-size: 3rem; margin-bottom: 1rem; }
+
+  .complete-title {
+    font-family: var(--serif);
+    font-size: 2rem;
+    color: var(--gold);
+    margin-bottom: 0.5rem;
+  }
+
+  .complete-sub {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.6;
+    margin-bottom: 2rem;
+  }
+
+  .score-display {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    background: var(--gold-soft);
+    border: 1px solid rgba(232,184,109,0.25);
+    border-radius: 14px;
+    padding: 1.5rem 3rem;
+    margin-bottom: 2rem;
+  }
+
+  .score-num {
+    font-family: var(--mono);
+    font-size: 3rem;
+    color: var(--gold);
+    line-height: 1;
+  }
+
+  .score-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 4px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .btn-restart {
+    background: transparent;
+    border: 1px solid var(--gold);
+    color: var(--gold);
+    border-radius: var(--r);
+    padding: 0.8rem 2.5rem;
+    font-family: var(--body);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-restart:hover { background: var(--gold-soft); }
+
+  /* ── Loading spinner ── */
+  .loading-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 2rem;
+    color: var(--muted);
+    font-size: 13px;
+    font-family: var(--mono);
+  }
+
+  .spinner {
+    width: 16px; height: 16px;
+    border: 2px solid var(--border2);
+    border-top-color: var(--gold);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── Fade animation ── */
+  .fade-in { animation: fadeIn 0.35s ease both; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+</style>
+</head>
+<body>
+
+<div id="progress-bar-wrap">
+  <div id="progress-bar"></div>
+</div>
+
+<header>
+  <div class="brand">
+    <span class="brand-name">TutorAI</span>
+    <span class="brand-tag">Interview Prep</span>
+  </div>
+  <span id="header-status" style="font-family:var(--mono);font-size:11px;color:var(--muted)"></span>
+</header>
+
+<main>
+  <div class="card">
+
+    <!-- ── Screen 1: Setup ── -->
+    <div class="screen active" id="screen-setup">
+      <div class="setup-body">
+        <div class="screen-label">Step 1 of 3 — Configure</div>
+        <h1 class="screen-title">What do you want<br><em>to master today?</em></h1>
+        <p class="screen-sub">Enter a topic, pick your level, and choose how many questions.</p>
+
+        <div class="field">
+          <label>Topic</label>
+          <input type="text" id="topic-input" placeholder="e.g. Python decorators, SQL joins, React hooks…" />
+        </div>
+
+        <div class="field">
+          <label>Difficulty Level</label>
+          <div class="level-grid">
+            <button class="level-btn" data-level="easy" onclick="selectLevel(this)">
+              <span class="lv-icon">🌱</span>
+              <span class="lv-label">Easy</span>
+              <span class="lv-desc">Basic concepts</span>
+            </button>
+            <button class="level-btn selected" data-level="medium" onclick="selectLevel(this)">
+              <span class="lv-icon">⚡</span>
+              <span class="lv-label">Medium</span>
+              <span class="lv-desc">Application</span>
+            </button>
+            <button class="level-btn" data-level="advanced" onclick="selectLevel(this)">
+              <span class="lv-icon">🔥</span>
+              <span class="lv-label">Advanced</span>
+              <span class="lv-desc">Deep dive</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Number of Questions</label>
+          <div class="count-row">
+            <button class="count-chip" data-count="3" onclick="selectCount(this)">3</button>
+            <button class="count-chip" data-count="5" onclick="selectCount(this)">5</button>
+            <button class="count-chip selected" data-count="7" onclick="selectCount(this)">7</button>
+            <button class="count-chip" data-count="10" onclick="selectCount(this)">10</button>
+            <input
+              type="number"
+              id="custom-count"
+              min="1"
+              max="50"
+              placeholder="Custom"
+              oninput="selectCustomCount(this)"
+              style="
+                width: 90px;
+                background: var(--surface2);
+                border: 1px solid var(--border2);
+                border-radius: 20px;
+                padding: 6px 14px;
+                font-family: var(--mono);
+                font-size: 13px;
+                color: var(--text);
+                outline: none;
+                transition: border-color 0.2s, box-shadow 0.2s;
+              "
+            />
+          </div>
+          <div style="font-size:11px;color:var(--muted);margin-top:6px;font-family:var(--mono);">
+            Type any number in the box for a custom count
+          </div>
+        </div>
+
+        <button class="btn-primary" id="start-btn" onclick="startSession()">
+          Start Session →
+        </button>
+      </div>
+    </div>
+
+    <!-- ── Screen 2: Question ── -->
+    <div class="screen" id="screen-question">
+      <div class="q-header">
+        <div class="q-meta">
+          <span class="q-num" id="q-num-label">Q 1/5</span>
+          <span class="q-topic-badge" id="q-topic-badge">Topic</span>
+          <span class="q-level-badge" id="q-level-badge">medium</span>
+        </div>
+        <div class="dot-progress" id="dot-progress"></div>
+      </div>
+
+      <div id="q-loading" class="loading-wrap" style="display:none">
+        <div class="spinner"></div> Generating question…
+      </div>
+
+      <div id="q-content" style="display:none">
+        <div class="q-body">
+          <div class="q-label">Question</div>
+          <div class="q-text" id="question-text"></div>
+          <div class="answer-label">Your Answer</div>
+          <textarea id="answer-input" placeholder="Type your answer here…"></textarea>
+        </div>
+        <div class="submit-row">
+          <button class="btn-submit" id="submit-btn" onclick="submitAnswer()">
+            Submit Answer →
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Screen 3: Result ── -->
+    <div class="screen" id="screen-result">
+      <div id="result-loading" class="loading-wrap" style="display:none">
+        <div class="spinner"></div> Evaluating your answer…
+      </div>
+
+      <div id="result-content" class="result-body fade-in" style="display:none">
+
+        <div id="verdict-banner" class="verdict-banner good">
+          <span class="verdict-icon" id="verdict-icon">✅</span>
+          <div class="verdict-text">
+            <div class="vt-title" id="verdict-title">Good for interview</div>
+            <div class="vt-score" id="verdict-score">Score: 8/10</div>
+          </div>
+          <!-- Score ring -->
+          <div id="score-ring" style="
+            margin-left:auto;
+            width:56px;height:56px;
+            border-radius:50%;
+            display:flex;align-items:center;justify-content:center;
+            flex-direction:column;
+            border:2px solid var(--gold);
+            background: var(--gold-soft);
+            flex-shrink:0;
+          ">
+            <span id="score-big" style="font-family:var(--mono);font-size:1.2rem;color:var(--gold);line-height:1;">8</span>
+            <span style="font-family:var(--mono);font-size:9px;color:var(--muted);">/10</span>
+          </div>
+        </div>
+
+        <div class="result-section">
+          <div class="result-section-title">Feedback</div>
+          <div class="result-box" id="result-feedback"></div>
+        </div>
+
+        <div class="result-section">
+          <div class="result-section-title">Correct Answer</div>
+          <div class="result-box correct-ans" id="result-correct"></div>
+        </div>
+
+        <div class="result-section" id="example-section">
+          <div class="result-section-title">Real World Example</div>
+          <div class="result-box example" id="result-example"></div>
+        </div>
+
+        <div class="result-actions">
+          <button class="btn-ok" id="ok-btn" onclick="handleOk()">
+            OK, I understand — Next Question →
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── Screen 4: Complete ── -->
+    <div class="screen" id="screen-complete">
+      <div class="complete-body fade-in">
+        <div class="complete-icon">🎓</div>
+        <h2 class="complete-title">Session Complete!</h2>
+        <p class="complete-sub" id="complete-sub">You've answered all questions.<br>Here's your overall performance.</p>
+
+        <div class="score-display">
+          <span class="score-num" id="final-score">7.2</span>
+          <span class="score-label">Average Score / 10</span>
+        </div>
+
+        <br>
+        <button class="btn-restart" onclick="restart()">← Start New Session</button>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<script>
+// ── Session State ──────────────────────────────────────────────────────────────
+const state = {
+  topic: '',
+  level: 'medium',
+  total: 7,
+  current: 1,
+  currentQuestion: '',
+  scores: [],
+};
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + id).classList.add('active');
+}
+
+function updateProgress() {
+  const pct = ((state.current - 1) / state.total) * 100;
+  document.getElementById('progress-bar').style.width = pct + '%';
+  document.getElementById('progress-bar-wrap').style.display = 'block';
+}
+
+function buildDots() {
+  const wrap = document.getElementById('dot-progress');
+  wrap.innerHTML = '';
+  for (let i = 1; i <= state.total; i++) {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i < state.current ? ' done' : i === state.current ? ' active' : '');
+    wrap.appendChild(d);
+  }
+}
+
+function selectLevel(btn) {
+  document.querySelectorAll('.level-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  state.level = btn.dataset.level;
+}
+
+function selectCount(chip) {
+  document.querySelectorAll('.count-chip').forEach(c => c.classList.remove('selected'));
+  chip.classList.add('selected');
+  state.total = parseInt(chip.dataset.count);
+  // Clear custom input
+  const custom = document.getElementById('custom-count');
+  if (custom) custom.value = '';
+}
+
+function selectCustomCount(input) {
+  const val = parseInt(input.value);
+  if (val && val >= 1 && val <= 50) {
+    // Deselect all chips
+    document.querySelectorAll('.count-chip').forEach(c => c.classList.remove('selected'));
+    state.total = val;
+    input.style.borderColor = 'var(--gold)';
+    input.style.boxShadow = '0 0 0 3px var(--gold-glow)';
+  } else {
+    input.style.borderColor = '';
+    input.style.boxShadow = '';
+  }
+}
+
+// ── Start Session ─────────────────────────────────────────────────────────────
+async function startSession() {
+  const topic = document.getElementById('topic-input').value.trim();
+  if (!topic) {
+    document.getElementById('topic-input').focus();
+    document.getElementById('topic-input').style.borderColor = 'var(--red)';
+    setTimeout(() => document.getElementById('topic-input').style.borderColor = '', 1500);
+    return;
+  }
+
+  state.topic = topic;
+  state.current = 1;
+  state.scores = [];
+
+  const btn = document.getElementById('start-btn');
+  btn.disabled = true;
+  btn.textContent = 'Generating first question…';
+
+  try {
+    const res = await fetch('/start', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ topic: state.topic, level: state.level, total: state.total }),
+    });
+
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+
+    state.currentQuestion = data.question;
+    showQuestionScreen();
+
+  } catch (err) {
+    btn.disabled = false;
+    btn.textContent = 'Start Session →';
+    alert('Error: ' + err.message);
+  }
+}
+
+// ── Show Question Screen ──────────────────────────────────────────────────────
+function showQuestionScreen() {
+  showScreen('question');
+  updateProgress();
+  buildDots();
+
+  document.getElementById('q-num-label').textContent = `Q ${state.current}/${state.total}`;
+  document.getElementById('q-topic-badge').textContent = state.topic;
+  document.getElementById('q-level-badge').textContent = state.level;
+  document.getElementById('header-status').textContent = `${state.topic} · ${state.level}`;
+
+  document.getElementById('question-text').textContent = state.currentQuestion;
+  document.getElementById('answer-input').value = '';
+  document.getElementById('answer-input').focus();
+
+  document.getElementById('q-loading').style.display = 'none';
+  document.getElementById('q-content').style.display = 'block';
+}
+
+// ── Submit Answer ─────────────────────────────────────────────────────────────
+async function submitAnswer() {
+  const answer = document.getElementById('answer-input').value.trim();
+  if (!answer) {
+    document.getElementById('answer-input').focus();
+    return;
+  }
+
+  document.getElementById('submit-btn').disabled = true;
+  showScreen('result');
+  document.getElementById('result-loading').style.display = 'flex';
+  document.getElementById('result-content').style.display = 'none';
+
+  try {
+    const res = await fetch('/evaluate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        topic: state.topic,
+        level: state.level,
+        question: state.currentQuestion,
+        answer: answer,
+      }),
+    });
+
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+
+    state.scores.push(data.score || 0);
+    renderResult(data);
+
+  } catch (err) {
+    alert('Error: ' + err.message);
+    showScreen('question');
+    document.getElementById('submit-btn').disabled = false;
+  }
+}
+
+// ── Render Result ─────────────────────────────────────────────────────────────
+function renderResult(data) {
+  const isGood = data.is_correct || data.verdict === 'Good for interview';
+  const score = data.score ?? 0;
+
+  // Verdict banner
+  const banner = document.getElementById('verdict-banner');
+  banner.className = 'verdict-banner ' + (isGood ? 'good' : 'bad');
+  document.getElementById('verdict-icon').textContent = isGood ? '✅' : '❌';
+  document.getElementById('verdict-title').textContent = data.verdict || (isGood ? 'Good for interview' : 'Not good for interview');
+  document.getElementById('verdict-score').textContent = `Score: ${score}/10`;
+
+  // Score ring — color changes by score
+  const ring = document.getElementById('score-ring');
+  const scoreBig = document.getElementById('score-big');
+  scoreBig.textContent = score;
+  if (score >= 7) {
+    ring.style.borderColor = 'var(--green)';
+    ring.style.background = 'var(--green-soft)';
+    scoreBig.style.color = 'var(--green)';
+  } else if (score >= 5) {
+    ring.style.borderColor = 'var(--gold)';
+    ring.style.background = 'var(--gold-soft)';
+    scoreBig.style.color = 'var(--gold)';
+  } else {
+    ring.style.borderColor = 'var(--red)';
+    ring.style.background = 'var(--red-soft)';
+    scoreBig.style.color = 'var(--red)';
+  }
+
+  document.getElementById('result-feedback').textContent = data.feedback || '—';
+  document.getElementById('result-correct').textContent = data.correct_answer || '—';
+
+  // Only show real-world example if model returned one
+  const example = (data.real_world_example || '').trim();
+  const exampleSection = document.getElementById('example-section');
+  if (example) {
+    document.getElementById('result-example').textContent = example;
+    exampleSection.style.display = 'block';
+  } else {
+    exampleSection.style.display = 'none';
+  }
+
+  // Update OK button label
+  const okBtn = document.getElementById('ok-btn');
+  if (state.current >= state.total) {
+    okBtn.textContent = 'Finish Session 🎓';
+  } else {
+    okBtn.textContent = `OK, I understand — Question ${state.current + 1} of ${state.total} →`;
+  }
+
+  document.getElementById('result-loading').style.display = 'none';
+  document.getElementById('result-content').style.display = 'block';
+  document.getElementById('submit-btn').disabled = false;
+}
+
+// ── OK Button → Next Question ─────────────────────────────────────────────────
+async function handleOk() {
+  // Last question → go to complete screen
+  if (state.current >= state.total) {
+    showCompleteScreen();
+    return;
+  }
+
+  state.current += 1;
+  updateProgress();
+
+  // Show question screen with loading state
+  showScreen('question');
+  buildDots();
+  document.getElementById('q-num-label').textContent = `Q ${state.current}/${state.total}`;
+  document.getElementById('q-loading').style.display = 'flex';
+  document.getElementById('q-content').style.display = 'none';
+
+  try {
+    const res = await fetch('/next', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        topic: state.topic,
+        level: state.level,
+        current: state.current,
+        total: state.total,
+      }),
+    });
+
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+
+    state.currentQuestion = data.question;
+    showQuestionScreen();
+
+  } catch (err) {
+    alert('Error: ' + err.message);
+  }
+}
+
+// ── Complete Screen ───────────────────────────────────────────────────────────
+function showCompleteScreen() {
+  showScreen('complete');
+  document.getElementById('progress-bar').style.width = '100%';
+
+  const avg = state.scores.length
+    ? (state.scores.reduce((a, b) => a + b, 0) / state.scores.length).toFixed(1)
+    : '—';
+
+  document.getElementById('final-score').textContent = avg;
+  document.getElementById('complete-sub').textContent =
+    `You answered all ${state.total} questions on "${state.topic}".\nKeep practising to nail the interview!`;
+}
+
+// ── Restart ────────────────────────────────────────────────────────────────────
+function restart() {
+  state.current = 1;
+  state.scores = [];
+  state.topic = '';
+  document.getElementById('topic-input').value = '';
+  document.getElementById('progress-bar').style.width = '0%';
+  document.getElementById('progress-bar-wrap').style.display = 'none';
+  document.getElementById('header-status').textContent = '';
+  document.getElementById('start-btn').disabled = false;
+  document.getElementById('start-btn').textContent = 'Start Session →';
+  showScreen('setup');
+}
+
+// Enter key submits on topic input
+document.getElementById('topic-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') startSession();
+});
+</script>
+</body>
+</html>
